@@ -63,6 +63,14 @@ npm start
 ```
 The frontend will open automatically at `http://localhost:4200`.
 
+## Demo Credentials
+You can use the following dummy accounts for testing:
+
+| Email | Password |
+| :--- | :--- |
+| `teja@gmail.com` | `teja1234` |
+| `karthik@gmail.com` | `karthik123` |
+
 ## Testing the Flow
 
 1.  **Register**: Go to `/register` and create a new account.
