@@ -1,0 +1,106 @@
+<nav class="bg-white/80 backdrop-blur-md border-b border-gray-200 sticky top-0 z-50">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="flex items-center justify-between h-14">
+
+            <!-- Left: Logo & Brand -->
+            <div class="flex items-center gap-2">
+                <a routerLink="/" class="flex items-center gap-2 group" (click)="closeMenus()">
+                    <img src="/logo.png" alt="DocuFlow" class="h-10 w-auto object-contain">
+                </a>
+            </div>
+
+            <!-- Center: Desktop Navigation -->
+            <div class="hidden md:flex items-center gap-1" *ngIf="currentUser$ | async">
+                <a routerLink="/documents" routerLinkActive="bg-blue-50 text-blue-700"
+                    [routerLinkActiveOptions]="{exact: true}"
+                    class="px-3 py-2 rounded-full text-sm font-medium text-slate-600 hover:text-slate-900 hover:bg-gray-50 transition-all duration-200">
+                    Documents
+                </a>
+                <a routerLink="/documents/upload" routerLinkActive="bg-blue-50 text-blue-700"
+                    class="px-3 py-2 rounded-full text-sm font-medium text-slate-600 hover:text-slate-900 hover:bg-gray-50 transition-all duration-200">
+                    Upload
+                </a>
+            </div>
+
+            <!-- Right: User Controls & Mobile Menu Button -->
+            <div class="flex items-center gap-4">
+
+                <!-- Authenticated State -->
+                <ng-container *ngIf="currentUser$ | async as user; else unauthenticated">
+                    <!-- Desktop User Profile -->
+                    <div class="hidden md:relative md:block">
+                        <button (click)="toggleUserMenu()" class="flex items-center gap-2 focus:outline-none group">
+                            <span
+                                class="text-sm font-medium text-slate-700 group-hover:text-slate-900 transition-colors">
+                                {{ user.name }}
+                            </span>
+                            <div
+                                class="w-8 h-8 rounded-full bg-slate-900 text-white flex items-center justify-center text-xs font-semibold shadow-sm ring-2 ring-transparent group-hover:ring-gray-200 transition-all">
+                                {{ user.name.charAt(0) | uppercase }}
+                            </div>
+                        </button>
+
+                        <!-- Dropdown Menu -->
+                        <div *ngIf="isUserMenuOpen"
+                            class="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-100 py-1 origin-top-right transform transition-all duration-200">
+                            <div class="px-4 py-2 border-b border-gray-50">
+                                <p class="text-xs text-gray-500">Signed in as</p>
+                                <p class="text-sm font-medium text-gray-900 truncate">{{ user.email }}</p>
+                            </div>
+                            <button (click)="logout()"
+                                class="block w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50 transition-colors">
+                                Logout
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Mobile Menu Button -->
+                    <button (click)="toggleMobileMenu()"
+                        class="md:hidden p-2 rounded-lg text-gray-500 hover:bg-gray-100 focus:outline-none">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path *ngIf="!isMobileMenuOpen" stroke-linecap="round" stroke-linejoin="round"
+                                stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+                            <path *ngIf="isMobileMenuOpen" stroke-linecap="round" stroke-linejoin="round"
+                                stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                        </svg>
+                    </button>
+                </ng-container>
+
+                <!-- Unauthenticated State -->
+                <ng-template #unauthenticated>
+                    <div class="flex items-center gap-3">
+                        <a routerLink="/login"
+                            class="text-sm font-medium text-slate-600 hover:text-slate-900 px-3 py-2 rounded-full hover:bg-gray-50 transition-colors">
+                            Login
+                        </a>
+                        <a routerLink="/register"
+                            class="text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded-full shadow-sm transition-colors">
+                            Register
+                        </a>
+                    </div>
+                </ng-template>
+            </div>
+        </div>
+    </div>
+
+    <!-- Mobile Menu Panel -->
+    <div *ngIf="isMobileMenuOpen && (currentUser$ | async)"
+        class="md:hidden border-t border-gray-100 bg-white shadow-lg absolute w-full left-0">
+        <div class="px-4 pt-2 pb-4 space-y-1">
+            <a routerLink="/documents" (click)="closeMenus()" routerLinkActive="bg-blue-50 text-blue-700"
+                class="block px-3 py-2 rounded-lg text-base font-medium text-slate-600 hover:text-slate-900 hover:bg-gray-50">
+                Documents
+            </a>
+            <a routerLink="/documents/upload" (click)="closeMenus()" routerLinkActive="bg-blue-50 text-blue-700"
+                class="block px-3 py-2 rounded-lg text-base font-medium text-slate-600 hover:text-slate-900 hover:bg-gray-50">
+                Upload
+            </a>
+            <div class="border-t border-gray-100 my-2 pt-2">
+                <button (click)="logout()"
+                    class="block w-full text-left px-3 py-2 rounded-lg text-base font-medium text-red-600 hover:bg-red-50">
+                    Logout
+                </button>
+            </div>
+        </div>
+    </div>
+</nav>

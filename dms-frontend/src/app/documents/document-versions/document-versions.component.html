@@ -1,0 +1,146 @@
+<div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8" *ngIf="document$ | async as doc">
+    <!-- Header -->
+    <div class="mb-8 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div>
+            <a [routerLink]="['/documents', doc._id]"
+                class="inline-flex items-center text-sm font-medium text-slate-500 hover:text-primary transition-colors mb-2">
+                <svg class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+                </svg>
+                Back to Document
+            </a>
+            <h1 class="text-2xl font-bold text-slate-900">Version History</h1>
+            <p class="text-slate-500 mt-1">Manage versions for <span class="font-medium text-slate-700">{{ doc.title
+                    }}</span></p>
+        </div>
+        <div class="flex items-center gap-3">
+            <span
+                class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-blue-50 text-blue-700 border border-blue-100">
+                Current: v{{ doc.currentVersion?.versionNumber || '1' }}
+            </span>
+        </div>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <!-- Version List -->
+        <div class="lg:col-span-2 space-y-6">
+            <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+                <div class="px-6 py-4 border-b border-gray-100 bg-gray-50/50 flex justify-between items-center">
+                    <h3 class="text-base font-semibold text-slate-900">History</h3>
+                    <span class="text-xs text-slate-500">{{ versions.length }} versions</span>
+                </div>
+                <ul role="list" class="divide-y divide-gray-100">
+                    <li *ngFor="let version of versions" class="group hover:bg-gray-50 transition-colors">
+                        <div class="px-6 py-4">
+                            <div class="flex items-center justify-between mb-2">
+                                <div class="flex items-center gap-3">
+                                    <span
+                                        class="flex items-center justify-center w-8 h-8 rounded-full bg-blue-100 text-blue-600 text-sm font-bold">
+                                        v{{ version.versionNumber }}
+                                    </span>
+                                    <div>
+                                        <p class="text-sm font-medium text-slate-900">
+                                            {{ version.changeLog || 'No changes logged' }}
+                                        </p>
+                                        <p class="text-xs text-slate-500">
+                                            {{ version.updatedAt | date:'medium' }} by {{ version.updatedBy?.name ||
+                                            'Unknown' }}
+                                        </p>
+                                    </div>
+                                </div>
+                                <div class="flex items-center gap-2">
+                                    <span *ngIf="version._id === doc.currentVersion?._id"
+                                        class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                                        Current
+                                    </span>
+                                    <a [href]="getFileUrl(version.filePath)" target="_blank"
+                                        class="inline-flex items-center px-3 py-1.5 border border-gray-200 shadow-sm text-xs font-medium rounded-lg text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary transition-all">
+                                        Download
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </li>
+                    <li *ngIf="versions.length === 0" class="px-6 py-8 text-center text-slate-500">
+                        No version history available.
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Upload New Version -->
+        <div class="lg:col-span-1">
+            <div class="bg-white rounded-xl shadow-sm border border-gray-200 sticky top-24">
+                <div class="px-6 py-4 border-b border-gray-100 bg-gray-50/50">
+                    <h3 class="text-base font-semibold text-slate-900">Upload New Version</h3>
+                </div>
+                <div class="p-6">
+                    <div *ngIf="success"
+                        class="mb-4 p-3 bg-green-50 border border-green-100 text-green-700 rounded-lg text-sm flex items-center">
+                        <svg class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                        </svg>
+                        Version uploaded successfully!
+                    </div>
+                    <div *ngIf="error"
+                        class="mb-4 p-3 bg-red-50 border border-red-100 text-red-700 rounded-lg text-sm flex items-center">
+                        <svg class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                        {{ error }}
+                    </div>
+
+                    <form [formGroup]="uploadVersionForm" (ngSubmit)="onUploadVersion(doc._id)" class="space-y-4">
+                        <div>
+                            <label class="block text-sm font-medium text-slate-700 mb-2">File</label>
+                            <div
+                                class="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-lg hover:border-primary transition-colors cursor-pointer relative bg-gray-50 hover:bg-white">
+                                <div class="space-y-1 text-center">
+                                    <svg class="mx-auto h-10 w-10 text-gray-400" stroke="currentColor" fill="none"
+                                        viewBox="0 0 48 48">
+                                        <path
+                                            d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02"
+                                            stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                                    </svg>
+                                    <div class="flex text-sm text-gray-600 justify-center">
+                                        <label for="file-upload"
+                                            class="relative cursor-pointer rounded-md font-medium text-primary hover:text-primary-hover focus-within:outline-none">
+                                            <span>Upload a file</span>
+                                            <input id="file-upload" name="file-upload" type="file" class="sr-only"
+                                                (change)="onFileSelected($event)">
+                                        </label>
+                                    </div>
+                                    <p class="text-xs text-gray-500">Up to 10MB</p>
+                                </div>
+                                <div *ngIf="selectedFile"
+                                    class="absolute inset-0 bg-white flex items-center justify-center rounded-lg border-2 border-primary">
+                                    <div class="text-center p-2">
+                                        <p class="text-sm font-medium text-primary truncate max-w-[200px]">{{
+                                            selectedFile.name }}</p>
+                                        <button type="button" (click)="selectedFile = null; $event.stopPropagation()"
+                                            class="text-xs text-red-500 hover:text-red-700 mt-1">Remove</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div>
+                            <label for="changeLog" class="block text-sm font-medium text-slate-700 mb-1">Change
+                                Log</label>
+                            <textarea id="changeLog" formControlName="changeLog" rows="3"
+                                placeholder="Describe what changed..."
+                                class="block w-full rounded-lg border-gray-300 shadow-sm focus:border-primary focus:ring-primary sm:text-sm px-3 py-2 border"></textarea>
+                        </div>
+
+                        <button type="submit" [disabled]="!selectedFile || loading"
+                            class="w-full flex justify-center py-2.5 px-4 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-primary hover:bg-primary-hover focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary disabled:opacity-50 disabled:cursor-not-allowed transition-all">
+                            {{ loading ? 'Uploading...' : 'Upload New Version' }}
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

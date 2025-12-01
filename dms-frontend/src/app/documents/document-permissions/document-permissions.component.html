@@ -1,0 +1,71 @@
+<div class="max-w-3xl mx-auto">
+    <div class="mb-6">
+        <a [routerLink]="['/documents', documentId]"
+            class="text-sm text-primary hover:text-primary-hover flex items-center">
+            <svg class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+            </svg>
+            Back to Document
+        </a>
+    </div>
+
+    <div class="bg-white rounded-xl shadow-lg p-8">
+        <h2 class="text-2xl font-bold mb-6 text-gray-900">Manage Permissions</h2>
+
+        <div class="mb-8">
+            <h3 class="text-lg font-medium text-gray-900 mb-4">Grant Access</h3>
+            <form [formGroup]="addPermissionForm" (ngSubmit)="addPermission()" class="flex gap-4">
+                <div class="flex-1">
+                    <label for="email" class="sr-only">Email address</label>
+                    <input type="email" id="email" formControlName="email" placeholder="Enter user email"
+                        class="block w-full rounded-lg border-gray-300 shadow-sm focus:border-primary focus:ring-primary sm:text-sm px-3 py-2 border">
+                </div>
+                <button type="submit" [disabled]="addPermissionForm.invalid || loading"
+                    class="px-6 py-2.5 border border-transparent shadow-sm text-sm font-medium rounded-lg text-white bg-primary hover:bg-primary-hover focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary disabled:opacity-50 disabled:cursor-not-allowed transition-all">
+                    {{ loading ? 'Adding...' : 'Grant Access' }}
+                </button>
+            </form>
+            <div *ngIf="error"
+                class="mt-3 p-3 bg-red-50 border border-red-100 text-red-700 rounded-lg text-sm flex items-center">
+                <svg class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                {{ error }}
+            </div>
+        </div>
+
+        <div>
+            <h3 class="text-lg font-medium text-gray-900 mb-4">Current Access</h3>
+            <div class="bg-white rounded-xl border border-gray-200 overflow-hidden shadow-sm">
+                <ul role="list" class="divide-y divide-gray-100">
+                    <li *ngFor="let user of permissions$ | async"
+                        class="px-6 py-4 flex items-center justify-between hover:bg-gray-50 transition-colors">
+                        <div class="flex items-center">
+                            <span
+                                class="inline-flex items-center justify-center h-10 w-10 rounded-full bg-blue-100 mr-4 ring-2 ring-white shadow-sm">
+                                <span class="text-sm font-bold leading-none text-blue-700">{{ user.name?.charAt(0) ||
+                                    'U' }}</span>
+                            </span>
+                            <div>
+                                <p class="text-sm font-semibold text-gray-900">{{ user.name }}</p>
+                                <p class="text-xs text-gray-500">{{ user.email }}</p>
+                            </div>
+                        </div>
+                        <button (click)="removePermission(user._id)"
+                            class="inline-flex items-center px-3 py-1.5 border border-gray-200 shadow-sm text-xs font-medium rounded-lg text-gray-700 bg-white hover:bg-red-50 hover:text-red-600 hover:border-red-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition-all">
+                            <svg class="h-3 w-3 mr-1.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                            </svg>
+                            Remove
+                        </button>
+                    </li>
+                    <li *ngIf="(permissions$ | async)?.length === 0" class="px-6 py-8 text-center text-slate-500">
+                        No additional users have access.
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
